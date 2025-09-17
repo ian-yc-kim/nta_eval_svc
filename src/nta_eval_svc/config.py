@@ -5,7 +5,13 @@ load_dotenv()
 
 
 class Config:
-    """Application configuration loaded from environment variables."""
+    """Application configuration loaded from environment variables.
+
+    This class reads configuration from environment variables at instantiation
+    time. It is intended to be used as a singleton via the module-level
+    `config` instance defined below. New configuration fields should follow the
+    existing patterns for consistency and safety.
+    """
 
     def __init__(self) -> None:
         # Core DB URL
@@ -21,6 +27,29 @@ class Config:
         self.APP_ENV: str = os.getenv("APP_ENV", "development")
         # Service settings
         self.SERVICE_PORT: int = self._get_int("SERVICE_PORT", 8000)
+
+        # OpenAI configuration
+        # Store raw API key; validation happens on access via property.
+        self._OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY") or None
+        # Model defaults to "gpt-3.5-turbo"; blank env values fall back to default.
+        self.OPENAI_MODEL: str = (os.getenv("OPENAI_MODEL") or "gpt-3.5-turbo").strip() or "gpt-3.5-turbo"
+
+    @property
+    def OPENAI_API_KEY(self) -> str:
+        """Validated OpenAI API key.
+
+        Returns:
+            str: The configured API key.
+
+        Raises:
+            ValueError: If the API key is not configured or is blank.
+        """
+        val = self._OPENAI_API_KEY
+        if val is None or val.strip() == "":
+            raise ValueError(
+                "OPENAI_API_KEY is not configured. Set the OPENAI_API_KEY environment variable."
+            )
+        return val
 
     @staticmethod
     def _get_bool(key: str, default: bool) -> bool:
