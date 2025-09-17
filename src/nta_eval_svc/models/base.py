@@ -1,19 +1,7 @@
-from sqlalchemy import Column, PrimaryKeyConstraint, String
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker, Session
+from sqlalchemy.orm import declarative_base
 
-from nta_eval_svc.config import DATABASE_URL
-
+# Keep Base here for Alembic integration and metadata access
 Base = declarative_base()
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
-
-
-def get_db() -> Session:
-    session = scoped_session(sessionmaker(bind=engine))
-    try:
-        yield session
-    finally:
-        session.close()
+# Re-export the database dependency for FastAPI DI
+from nta_eval_svc.core.database import get_db  # noqa: E402
