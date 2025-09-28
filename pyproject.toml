@@ -18,6 +18,7 @@ uvicorn = "^0.32.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
 httpx = "^0.28.1"
+pytest-asyncio = "^1.2.0"
 
 [tool.poetry.scripts]
 nta_eval_svc = "nta_eval_svc.main:main"
