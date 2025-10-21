@@ -34,6 +34,34 @@ class Config:
         # Model defaults to "gpt-3.5-turbo"; blank env values fall back to default.
         self.OPENAI_MODEL: str = (os.getenv("OPENAI_MODEL") or "gpt-3.5-turbo").strip() or "gpt-3.5-turbo"
 
+        # Redis and Celery configuration defaults
+        # Redis host/port used as convenient defaults for Celery broker/result backend
+        self.REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
+        self.REDIS_PORT: int = self._get_int("REDIS_PORT", 6379)
+
+        # Celery connection URLs: explicit env vars take precedence; otherwise derive from REDIS_*
+        self.CELERY_BROKER_URL: str = os.getenv(
+            "CELERY_BROKER_URL",
+            f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        )
+        self.CELERY_RESULT_BACKEND: str = os.getenv(
+            "CELERY_RESULT_BACKEND",
+            f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        )
+
+        # Serializers and accepted content
+        self.CELERY_TASK_SERIALIZER: str = os.getenv("CELERY_TASK_SERIALIZER", "json")
+        self.CELERY_RESULT_SERIALIZER: str = os.getenv("CELERY_RESULT_SERIALIZER", "json")
+        self.CELERY_ACCEPT_CONTENT: str = os.getenv("CELERY_ACCEPT_CONTENT", "json")
+
+        # Timezone and UTC handling
+        self.CELERY_TIMEZONE: str = os.getenv("CELERY_TIMEZONE", "UTC")
+        self.CELERY_ENABLE_UTC: bool = self._get_bool("CELERY_ENABLE_UTC", True)
+
+        # Task tracking and concurrency
+        self.CELERY_TASK_TRACK_STARTED: bool = self._get_bool("CELERY_TASK_TRACK_STARTED", True)
+        self.CELERY_WORKER_CONCURRENCY: int = self._get_int("CELERY_WORKER_CONCURRENCY", 4)
+
     @property
     def OPENAI_API_KEY(self) -> str:
         """Validated OpenAI API key.
