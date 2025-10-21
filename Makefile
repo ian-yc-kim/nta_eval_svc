@@ -9,3 +9,6 @@ unittest:
 
 run:
 	poetry run nta_eval_svc
+
+celery_worker:
+	celery -A nta_eval_svc.workers.celery_app worker --loglevel=info
