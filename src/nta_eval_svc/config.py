@@ -62,6 +62,18 @@ class Config:
         self.CELERY_TASK_TRACK_STARTED: bool = self._get_bool("CELERY_TASK_TRACK_STARTED", True)
         self.CELERY_WORKER_CONCURRENCY: int = self._get_int("CELERY_WORKER_CONCURRENCY", 4)
 
+        # Long polling configuration
+        # Default timeout in seconds for a long-polling request
+        self.LONG_POLLING_DEFAULT_TIMEOUT: int = self._get_int("LONG_POLLING_DEFAULT_TIMEOUT", 30)
+        # Poll interval in seconds (float) used for asyncio.sleep when polling
+        self.LONG_POLLING_POLL_INTERVAL: float = self._get_float("LONG_POLLING_POLL_INTERVAL", 0.5)
+        # Connection limits
+        self.LONG_POLLING_MAX_CLIENT_CONNECTIONS: int = self._get_int("LONG_POLLING_MAX_CLIENT_CONNECTIONS", 5)
+        self.LONG_POLLING_GLOBAL_MAX_CONNECTIONS: int = self._get_int("LONG_POLLING_GLOBAL_MAX_CONNECTIONS", 1000)
+        # Rate limiting window and request limit
+        self.LONG_POLLING_RATE_LIMIT_INTERVAL: int = self._get_int("LONG_POLLING_RATE_LIMIT_INTERVAL", 60)
+        self.LONG_POLLING_RATE_LIMIT_REQUESTS: int = self._get_int("LONG_POLLING_RATE_LIMIT_REQUESTS", 100)
+
     @property
     def OPENAI_API_KEY(self) -> str:
         """Validated OpenAI API key.
@@ -94,6 +106,17 @@ class Config:
         try:
             return int(val)
         except ValueError:
+            return default
+
+    @staticmethod
+    def _get_float(key: str, default: float) -> float:
+        """Read environment variable as float with safe fallback to default."""
+        val = os.getenv(key)
+        if val is None:
+            return default
+        try:
+            return float(val)
+        except (ValueError, TypeError):
             return default
 
 
